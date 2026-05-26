@@ -3,18 +3,23 @@ from urllib.parse import urlparse, parse_qs
 import pandas as pd
 from google_play_scraper import reviews, Sort
 from app_store_web_scraper import AppStoreEntry
+from dotenv import load_dotenv
+import os
 
+load_dotenv()  # Loads variables from .env file
 
-GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.spotify.music"
-APPLE_APP_STORE_URL = "https://apps.apple.com/us/app/spotify-music-and-podcasts/id324684580"
+# Access variables from environment with defaults
+GOOGLE_PLAY_URL = os.getenv('PLAY_STORE_URL', "https://play.google.com/store/apps/details?id=com.spotify.music")  
+APPLE_APP_STORE_URL = os.getenv('APP_STORE_URL', "https://apps.apple.com/us/app/spotify-music-and-podcasts/id324684580")
 
+# Configuration constants - can be adjusted as needed
 COUNTRY = "us"
 LANG = "en"
-PLAY_LIMIT = 500
-APP_STORE_LIMIT = 500
+PLAY_LIMIT = 1000
+APP_STORE_LIMIT = 1000
 OUTPUT_FILE = "combined_app_reviews.csv"
 
-
+# Helper functions to extract app IDs from URLs
 def extract_google_play_id(url: str) -> str:
     parsed = urlparse(url)
     query = parse_qs(parsed.query)
@@ -30,11 +35,12 @@ def extract_apple_app_id(url: str) -> int:
         raise ValueError("Could not find Apple numeric app ID in URL.")
     return int(match.group(1))
 
-
+# Fetch reviews from Google Play using google_play_scraper
 def fetch_google_play_reviews(app_id, country="us", lang="en", limit=500):
     rows = []
     token = None
 
+    # Loop until we have enough reviews or there are no more to fetch
     while len(rows) < limit:
         batch_size = min(200, limit - len(rows))
         batch, token = reviews(
@@ -49,6 +55,7 @@ def fetch_google_play_reviews(app_id, country="us", lang="en", limit=500):
         if not batch:
             break
 
+        # Process each review in the batch and append to rows
         for r in batch:
             rows.append({
                 "store": "google_play",
@@ -56,7 +63,7 @@ def fetch_google_play_reviews(app_id, country="us", lang="en", limit=500):
                 "review_id": r.get("reviewId"),
                 "date": r.get("at"),
                 "rating": r.get("score"),
-                "title": None,
+                "title": None, # Google Play reviews do not have a separate title field
                 "text": r.get("content"),
                 "user_name": r.get("userName"),
                 "developer_reply": r.get("replyContent"),
@@ -72,7 +79,7 @@ def fetch_google_play_reviews(app_id, country="us", lang="en", limit=500):
 
     return pd.DataFrame(rows)
 
-
+# Fetch reviews from Apple App Store using app_store_web_scraper
 def fetch_app_store_reviews(app_id, country="us", limit=500):
     app = AppStoreEntry(app_id=app_id, country=country)
     rows = []
@@ -100,7 +107,7 @@ def fetch_app_store_reviews(app_id, country="us", limit=500):
 
     return pd.DataFrame(rows)
 
-
+# Main execution flow
 play_app_id = extract_google_play_id(GOOGLE_PLAY_URL)
 apple_app_id = extract_apple_app_id(APPLE_APP_STORE_URL)
 
@@ -117,11 +124,15 @@ as_df = fetch_app_store_reviews(
     limit=APP_STORE_LIMIT
 )
 
-combined = pd.concat([gp_df, as_df], ignore_index=True)
-combined["date"] = pd.to_datetime(combined["date"], errors="coerce")
-combined = combined.sort_values(["date", "store"], ascending=[False, True])
+# Combine and save results
+combined = pd.concat([gp_df, as_df], ignore_index=True) # combine DataFrames and reset index
+combined["date"] = pd.to_datetime(combined["date"], errors="coerce") # Convert date column to datetime, coercing errors to NaT
+combined = combined.sort_values(["date", "store"], ascending=[False, True]) # Sort by date (newest first) and then by store (Google Play before App Store for same date)
 
 combined.to_csv(OUTPUT_FILE, index=False)
 
+# Print summary and sample data
 print(f"Saved {len(combined)} rows to {OUTPUT_FILE}")
-print(combined.head(10))
+print(combined.head(10)) # Display the first 10 rows of the combined DataFrame for verification
+
+  
