@@ -134,5 +134,3 @@ combined.to_csv(OUTPUT_FILE, index=False)
 # Print summary and sample data
 print(f"Saved {len(combined)} rows to {OUTPUT_FILE}")
 print(combined.head(10)) # Display the first 10 rows of the combined DataFrame for verification
-
-  
