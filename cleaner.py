@@ -1,6 +1,6 @@
 import pandas as pd
 
-INPUT_FILE = "combined_app_reviews.csv"
+INPUT_FILE = "routinery_app_reviews.csv"
 OUTPUT_FILE = "cleaned_app_reviews.csv"
 
 df = pd.read_csv(INPUT_FILE)   # column: text 
