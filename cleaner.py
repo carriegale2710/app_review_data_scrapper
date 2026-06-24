@@ -1,11 +1,12 @@
 import pandas as pd
 
-INPUT_FILE = "routinery_app_reviews.csv"
+INPUT_FILE = "combined_app_reviews.csv"
 OUTPUT_FILE = "cleaned_app_reviews.csv"
 
 df = pd.read_csv(INPUT_FILE)   # column: text 
 
 # very simple cleaning
+df = df.drop_duplicates()
 df["clean_text"] = (
     df["text"]
     .fillna("")  # Replace NaN with empty string
@@ -16,6 +17,10 @@ df["clean_text"] = (
 )
 
 print(df[["text", "clean_text"]].head(10)) # Display the original and cleaned review text for the first 10 rows
+
+# Remove short reviews with <10 words
+df["char_count"] = df["clean_text"].str.len()
+df = df.loc[df['char_count'] > 30]
 
 # Save the cleaned DataFrame to a new CSV file
 df.to_csv(OUTPUT_FILE, index=False) # Save the cleaned DataFrame to a new CSV file without the index

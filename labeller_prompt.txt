@@ -1,0 +1,88 @@
+You are helping analyze competitor app reviews in a CSV file.
+
+Research question:
+“What unmet job is still painful enough to make someone switch, and why?”
+
+Task:
+For each review row, append one new column called:
+codes
+
+The value in the codes column must be:
+- an empty string if no code fits
+- or a pipe-separated list of 1 or 2 codes only, like:
+core_job_blocked|switch_trigger
+
+Important coding rules:
+- Assign 0, 1, or 2 codes only.
+- Prefer 1 code.
+- Use 2 codes only when the review clearly contains two distinct ideas that both matter to the research question.
+- Do not assign more than 2 codes.
+- Do not infer hidden motives that are not directly supported by the review text.
+- Focus only on evidence related to unmet jobs, painful gaps, trust breaks, workarounds, or switching.
+- Ignore generic praise or generic negativity unless it clearly supports one of the codes.
+- If a review is vague or not relevant, leave codes blank.
+- Keep the rest of the CSV exactly the same and only append the new codes column.
+
+Codebook:
+
+1. core_job_blocked
+Use when the review says the app fails at the main job the user needs done, so the core outcome cannot be completed or is seriously compromised.
+Use examples:
+- cannot complete the main task
+- key workflow is broken
+- app is unusable for the primary purpose
+Do not use:
+- minor annoyance
+- cosmetic complaint
+- optional feature preference
+
+2. painful_workaround
+Use when the review shows the user had to do extra manual work, use another tool, repeat steps, or create a workaround because the app does not fully do the job.
+Use examples:
+- exporting manually every time
+- switching to another tool for one step
+- repeating actions because the app does not support the workflow
+Do not use:
+- simple frustration without any extra effort or workaround described
+
+3. must_have_gap
+Use when a missing capability is described as essential for serious use, adoption, retention, or completing the job well.
+Use examples:
+- “I need offline mode”
+- “without export this is useless”
+- “this app needs X to be usable for my workflow”
+Do not use:
+- weak suggestions
+- nice-to-have feature ideas
+- general brainstorming requests
+
+4. trust_reliability_break
+Use when the app is too unreliable or risky to trust for the job.
+Use examples:
+- crashes
+- data loss
+- sync failure
+- wrong results
+- account or billing failure that breaks confidence in using the product
+Do not use:
+- mild annoyance
+- minor slowness unless it clearly affects trust or reliability
+
+5. switch_trigger
+Use when the review explicitly or strongly implies uninstalling, churning, switching to another app, refunding, canceling, or refusing to keep using the app because the pain is too high.
+Use examples:
+- “I’m switching”
+- “going back to X”
+- “cancelled”
+- “not worth keeping”
+Do not use:
+- generic negative sentiment without evidence of abandonment or replacement
+
+Output requirements:
+- Return the full CSV.
+- Preserve all original rows and columns.
+- Append one new column at the end named exactly:
+codes
+- In each row, the codes value must be either blank or a pipe-separated list of up to 2 codes.
+- Do not add explanation outside the CSV.
+- Do not add any other new columns.
