@@ -35,6 +35,7 @@ def extract_apple_app_id(url: str) -> int:
 
 # Fetch reviews from Google Play using google_play_scraper
 def fetch_google_play_reviews(app_id, country="us", lang="en", limit=500):
+    print("Fetching reviews from google play...")
     rows = []
     token = None
 
@@ -75,10 +76,12 @@ def fetch_google_play_reviews(app_id, country="us", lang="en", limit=500):
         if token is None:
             break
 
+    print(f"Fetched {len(pd.DataFrame(rows))} reviews from Play Store")
     return pd.DataFrame(rows)
 
 # Fetch reviews from Apple App Store using app_store_web_scraper
 def fetch_app_store_reviews(app_id, country="us", limit=500):
+    print("Fetching reviews from Apple App store...")
     app = AppStoreEntry(app_id=app_id, country=country)
     rows = []
 
@@ -103,6 +106,7 @@ def fetch_app_store_reviews(app_id, country="us", limit=500):
             "language": None
         })
 
+    print(f"Fetched {len(pd.DataFrame(rows))} reviews from Apple App Store")
     return pd.DataFrame(rows)
 
 # Main execution flow
